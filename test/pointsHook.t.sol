@@ -112,4 +112,26 @@ contract TestPointsHook is Test, Deployers, ERC1155TokenReceiver {
         console.log(balanceBefore, balanceAfter, balanceAfter - balanceBefore, 2 *10 **14);
         assertEq(balanceAfter - balanceBefore, 2 * 10 ** 14);
     }
+
+    function test_swap_no_points() public{
+        uint256 poolIdUint = uint256(PoolId.unwrap(key.toId()));
+        uint256 balanceBefore = hook.balanceOf(address(this), poolIdUint);
+
+        swapRouter.swap{value: 0.001 ether}(
+            key,
+            SwapParams({
+                zeroForOne: true,
+                amountSpecified: -0.001 ether,
+                sqrtPriceLimitX96: TickMath.MIN_SQRT_PRICE +1
+            }),
+             PoolSwapTest.TestSettings({
+                takeClaims: false,
+                settleUsingBurn: false
+            }),
+            abi.encode("")
+        );
+        uint256 balanceAfter = hook.balanceOf(address(this), poolIdUint);
+        console.log(balanceBefore, balanceAfter);
+        assertEq(balanceAfter ,balanceBefore);
+    }
 }
